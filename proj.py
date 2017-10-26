@@ -25,17 +25,6 @@ def text_preprocess(text, stop_words=stop_words):
     #print(word_list)
     return word_list
 
-def count_words(tokens):
-    word_count = {}
-
-    for word in tokens:
-        if word in word_count:
-            word_count[word] += 1
-        else:
-            word_count[word] = 1
-
-    return word_count
-
 
 # we probably don't need an inverted index for exercise 1
 """
@@ -69,18 +58,34 @@ def calculate_tf_idf(sentence_tokens, vocab, vocab_size):
 	#idf is a (vocab_size,) vector where each position
 	#represents the inverse document frequency of that term
 	#idf is a global measure, as such it doesn't depend on a single document
-	idf = np.zeros((vocab_size))
+	idf_vector = np.zeros((vocab_size))
+	num_sentences = len(sentence_tokens)
 
-	for word in vocab:
+	for i, word in enumerate(vocab):
 
-		#calculate document frequency
+		#calculate document frequency(in truth it's actually sentence frequency)
+		#iterate all sentences and count in how many a word occurs
 		df = 0
 		for sentence in sentence_tokens:
 			if word in sentence:
 				df += 1
 
-		N = len(sentence_tokens)
-		idf = log(N / df)
+		idf = log(num_sentences / df)
+		idf_vector[i] = idf
+
+
+def count_words(tokens):
+    word_count = {}
+
+    for word in tokens:
+        if word in word_count:
+            word_count[word] += 1
+        else:
+            word_count[word] = 1
+
+    return word_count
+
+	
 
 
 f = open('doc.txt')
