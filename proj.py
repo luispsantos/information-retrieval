@@ -25,33 +25,6 @@ def text_preprocess(text, stop_words=stop_words):
     #print(word_list)
     return word_list
 
-
-# we probably don't need an inverted index for exercise 1
-"""
-def build_inv_index(sentence_tokens, doc_tokens):
-    inv_index = {}
-
-    #index both the document and sentences
-    #doc will have an id of 0
-    docs = sentence_tokens.copy()
-    docs.insert(0, doc_tokens)
-
-    for i, tokens in enumerate(docs):
-        word_count = count_words(tokens)
-        max_count = max(word_count.values())
-
-        for word in word_count:
-            #store normalized term frequency in index
-            norm_tf = word_count[word] / max_count
-            word_freqs = (i, norm_tf)
-
-            if word in inv_index:
-                inv_index[word].append(word_freqs)
-            else:
-                inv_index[word] = [word_freqs]
-
-    return inv_index
-"""   
      
 def calculate_tf_idf(sentence_tokens, vocab, vocab_size, word_to_index):
 	
