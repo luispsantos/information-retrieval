@@ -53,7 +53,7 @@ def build_inv_index(sentence_tokens, doc_tokens):
     return inv_index
 """   
      
-def calculate_tf_idf(sentence_tokens, vocab, vocab_size):
+def calculate_tf_idf(sentence_tokens, vocab, vocab_size, word_to_index):
 	
 	#idf is a (vocab_size,) vector where each position
 	#represents the inverse document frequency of that term
@@ -61,7 +61,7 @@ def calculate_tf_idf(sentence_tokens, vocab, vocab_size):
 	idf_vector = np.zeros((vocab_size))
 	num_sentences = len(sentence_tokens)
 
-	for i, word in enumerate(vocab):
+	for word in vocab:
 
 		#calculate document frequency(in truth it's actually sentence frequency)
 		#iterate all sentences and count in how many a word occurs
@@ -71,21 +71,22 @@ def calculate_tf_idf(sentence_tokens, vocab, vocab_size):
 				df += 1
 
 		idf = log(num_sentences / df)
-		idf_vector[i] = idf
+		idf_vector[word_to_index[word]] = idf
 
+	#calculate term_frequency
+	#tf is a (num_sentences, vocab_size) matrix with normalized tf scores
+	#for each sentence
+	tf_matrix = np.zeros((num_sentences, vocab_size))
 
-def count_words(tokens):
-    word_count = {}
+	for sent_id, sentence in enumerate(sentence_tokens):
+		for word in sentence:
+			tf_matrix[sent_id, word_to_index[word]] += 1
 
-    for word in tokens:
-        if word in word_count:
-            word_count[word] += 1
-        else:
-            word_count[word] = 1
+	#normalizing tf scores
+	tf_matrix = tf_matrix / tf_matrix.max(axis=1, keepdims=True)
 
-    return word_count
+	return tf_matrix
 
-	
 
 
 f = open('doc.txt')
@@ -100,12 +101,11 @@ sentence_tokens = [text_preprocess(sent) for sent in sentences]
 doc_tokens = text_preprocess(doc)
 
 #vocab size - number of unique words in the document
-vocab = set(doc_tokens)
+vocab = list(set(doc_tokens))
 vocab_size = len(vocab)
 
-#inv_index = build_inv_index(sentence_tokens, doc_tokens)
-#print(inv_index)
+#create mapping between words and indexes
+word_to_index = {word:i for i, word in enumerate(vocab)}
+index_to_word = {i:word for i, word in enumerate(vocab)}
 
-#calculate tf-idf vectors
-#for i, word in enumerate(vocab):
-
+a=calculate_tf_idf(sentence_tokens, vocab, vocab_size, word_to_index)
