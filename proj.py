@@ -5,6 +5,7 @@ from nltk.stem import snowball
 import re
 import numpy as np
 from math import log
+import string
 
 doc_language = 'english'
 #doc_language = 'portuguese'
@@ -22,10 +23,7 @@ def text_preprocess(text, stop_words=stop_words):
     #convert to lowercase
     text = text.lower()
 
-    #remove punctuation - anything other than words or whitespace
-    text = re.sub(r'[^\w\s]', '', text)
-
-    #break up textences into words
+    #break up text into words
     word_list = word_tokenize(text)
 
     #remove stopwords
@@ -35,7 +33,9 @@ def text_preprocess(text, stop_words=stop_words):
 
     word_list = list(map(stemmer.stem, word_list))
 
-    #print(word_list)
+    #remove stopwords and punctuation
+    word_list = [word for word in word_list if word not in string.punctuation and word not in stop_words]
+
     return word_list
 
      
