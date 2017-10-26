@@ -1,6 +1,7 @@
 #import nltk
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
+from nltk.stem import snowball
 import re
 import numpy as np
 from math import log
@@ -29,6 +30,11 @@ def text_preprocess(text, stop_words=stop_words):
 
     #remove stopwords
     word_list = [word for word in word_list if word not in stop_words]
+
+    stemmer = PortugueseStemmer(ignore_stopwords=False)
+
+    word_list = list(map(stemmer.stem, word_list))
+
     #print(word_list)
     return word_list
 
@@ -51,7 +57,7 @@ def calculate_tf_idf(sentence_tokens, vocab, vocab_size, word_to_index):
 				df += 1
 
 		idf = log(num_sentences / df)
-		idf_vector[word_to_index[word]] = idf
+		idf/home/felitchia_vector[word_to_index[word]] = idf
 
 	#calculate term_frequency
 	#tf is a (num_sentences, vocab_size) matrix with normalized tf scores
