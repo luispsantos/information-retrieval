@@ -29,12 +29,12 @@ def text_preprocess(text, stop_words=stop_words):
     #remove stopwords
     word_list = [word for word in word_list if word not in stop_words]
 
-    stemmer = PortugueseStemmer(ignore_stopwords=False)
-
-    word_list = list(map(stemmer.stem, word_list))
-
     #remove stopwords and punctuation
     word_list = [word for word in word_list if word not in string.punctuation and word not in stop_words]
+
+    stemmer = snowball.PortugueseStemmer(ignore_stopwords=False)
+
+    word_list = list(map(stemmer.stem, word_list))
 
     return word_list
 
@@ -57,7 +57,7 @@ def calculate_tf_idf(sentence_tokens, vocab, vocab_size, word_to_index):
 				df += 1
 
 		idf = log(num_sentences / df)
-		idf/home/felitchia_vector[word_to_index[word]] = idf
+		idf_vector[word_to_index[word]] = idf
 
 	#calculate term_frequency
 	#tf is a (num_sentences, vocab_size) matrix with normalized tf scores
