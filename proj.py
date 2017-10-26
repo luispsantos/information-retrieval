@@ -4,6 +4,7 @@ from nltk.corpus import stopwords
 import re
 import numpy as np
 from math import log
+import string
 
 doc_language = 'english'
 #doc_language = 'portuguese'
@@ -21,15 +22,14 @@ def text_preprocess(text, stop_words=stop_words):
     #convert to lowercase
     text = text.lower()
 
-    #remove punctuation - anything other than words or whitespace
-    text = re.sub(r'[^\w\s]', '', text)
-
-    #break up textences into words
+    #break up text into words
     word_list = word_tokenize(text)
 
-    #remove stopwords
-    word_list = [word for word in word_list if word not in stop_words]
-    #print(word_list)
+    #remove stopwords and punctuation
+    word_list = [word for word in word_list if word not in string.punctuation and word not in stop_words]
+
+    #stemmer should come here
+
     return word_list
 
      
