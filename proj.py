@@ -11,6 +11,13 @@ doc_language = 'english'
 stop_words = stopwords.words(doc_language)
 
 def text_preprocess(text, stop_words=stop_words):
+    """
+    pre-process text according to standard techniques
+    used in IR for text pre processing, a good description
+    of the techniques can be found in Chris D. Manning's book
+    on Information Retrieval at chapter 2
+    """
+
     #convert to lowercase
     text = text.lower()
 
@@ -58,7 +65,10 @@ def calculate_tf_idf(sentence_tokens, vocab, vocab_size, word_to_index):
 	#normalizing tf scores
 	tf_matrix = tf_matrix / tf_matrix.max(axis=1, keepdims=True)
 
-	return tf_matrix
+	#numpy broadcasting takes care of converting idf_vector to a matrix
+	tf_idf_matrix = tf_matrix * idf_vector
+
+	return idf_vector, tf_matrix
 
 
 
@@ -81,4 +91,5 @@ vocab_size = len(vocab)
 word_to_index = {word:i for i, word in enumerate(vocab)}
 index_to_word = {i:word for i, word in enumerate(vocab)}
 
-a=calculate_tf_idf(sentence_tokens, vocab, vocab_size, word_to_index)
+idf_vector, tf_matrix = calculate_tf_idf(sentence_tokens, vocab, vocab_size, word_to_index)
+
