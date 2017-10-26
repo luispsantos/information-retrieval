@@ -2,6 +2,8 @@
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 import re
+import numpy as np
+from math import log
 
 doc_language = 'english'
 #doc_language = 'portuguese'
@@ -26,7 +28,6 @@ def text_preprocess(text, stop_words=stop_words):
 def count_words(tokens):
     word_count = {}
 
-    print(tokens)
     for word in tokens:
         if word in word_count:
             word_count[word] += 1
@@ -35,6 +36,9 @@ def count_words(tokens):
 
     return word_count
 
+
+# we probably don't need an inverted index for exercise 1
+"""
 def build_inv_index(sentence_tokens, doc_tokens):
     inv_index = {}
 
@@ -58,7 +62,26 @@ def build_inv_index(sentence_tokens, doc_tokens):
                 inv_index[word] = [word_freqs]
 
     return inv_index
-        
+"""   
+     
+def calculate_tf_idf(sentence_tokens, vocab, vocab_size):
+	
+	#idf is a (vocab_size,) vector where each position
+	#represents the inverse document frequency of that term
+	#idf is a global measure, as such it doesn't depend on a single document
+	idf = np.zeros((vocab_size))
+
+	for word in vocab:
+
+		#calculate document frequency
+		df = 0
+		for sentence in sentence_tokens:
+			if word in sentence:
+				df += 1
+
+		N = len(sentence_tokens)
+		idf = log(N / df)
+
 
 f = open('doc.txt')
 doc = f.read()
@@ -75,8 +98,8 @@ doc_tokens = text_preprocess(doc)
 vocab = set(doc_tokens)
 vocab_size = len(vocab)
 
-inv_index = build_inv_index(sentence_tokens, doc_tokens)
-print(inv_index)
+#inv_index = build_inv_index(sentence_tokens, doc_tokens)
+#print(inv_index)
 
 #calculate tf-idf vectors
 #for i, word in enumerate(vocab):
