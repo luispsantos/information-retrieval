@@ -1,8 +1,6 @@
-#import nltk
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import snowball
-import re
 import numpy as np
 from math import log
 import string
@@ -39,42 +37,61 @@ def text_preprocess(text, stop_words=stop_words):
     return word_list
 
      
-def calculate_tf_idf(sentence_tokens, vocab, vocab_size, word_to_index):
-	
-	#idf is a (vocab_size,) vector where each position
-	#represents the inverse document frequency of that term
-	#idf is a global measure, as such it doesn't depend on a single document
-	idf_vector = np.zeros((vocab_size))
-	num_sentences = len(sentence_tokens)
+def calculate_tf_idf(sentence_tokens, doc_tokens, vocab, vocab_size, word_to_index):
+    
+    #idf is a (vocab_size,) vector where each position
+    #represents the inverse document frequency of that term
+    #idf is a global measure, as such it doesn't depend on a single sentence
+    idf_vector = np.zeros((vocab_size))
+    num_sentences = len(sentence_tokens)
 
-	for word in vocab:
+    for word in vocab:
 
-		#calculate document frequency(in truth it's actually sentence frequency)
-		#iterate all sentences and count in how many a word occurs
-		df = 0
-		for sentence in sentence_tokens:
-			if word in sentence:
-				df += 1
+        #calculate document frequency(in truth it's actually sentence frequency)
+        #iterate all sentences and count in how many a word occurs
+        df = 0
+        for sentence in sentence_tokens:
+            if word in sentence:
+                df += 1
 
-		idf = log(num_sentences / df)
-		idf_vector[word_to_index[word]] = idf
+        idf = log(num_sentences / df)
+        idf_vector[word_to_index[word]] = idf
 
-	#calculate term_frequency
-	#tf is a (num_sentences, vocab_size) matrix with normalized tf scores
-	#for each sentence
-	tf_matrix = np.zeros((num_sentences, vocab_size))
+    #calculate term frequency for sentences
+    #sent_tf_matrix is a (num_sentences, vocab_size) matrix with normalized tf scores
+    #where each line represents a sentences and each column represents a term
+    sent_tf_matrix = np.zeros((num_sentences, vocab_size))
 
-	for sent_id, sentence in enumerate(sentence_tokens):
-		for word in sentence:
-			tf_matrix[sent_id, word_to_index[word]] += 1
+    for sent_id, sentence in enumerate(sentence_tokens):
+        for word in sentence:
+            sent_tf_matrix[sent_id, word_to_index[word]] += 1
 
-	#normalizing tf scores
-	tf_matrix = tf_matrix / tf_matrix.max(axis=1, keepdims=True)
+    #normalizing tf scores
+    sent_tf_matrix = sent_tf_matrix / sent_tf_matrix.max(axis=1, keepdims=True)
 
-	#numpy broadcasting takes care of converting idf_vector to a matrix
-	tf_idf_matrix = tf_matrix * idf_vector
+    #calculate term frequency for documents
+    #very similar to the term frequency for sentences
+    #doc_tf_vector is a (vocab_size,) vector with normalized tf scores
+    doc_tf_vector = np.zeros((vocab_size))
 
-	return idf_vector, tf_matrix
+    for word in doc_tokens:
+        doc_tf_vector[word_to_index[word]] += 1
+    
+    #normalizing tf scores
+    doc_tf_vector = doc_tf_vector / doc_tf_vector.max()
+
+
+    #now to obtain tf-idf scores we multiply the tf_matrix for sentences
+    #with the idf_vector, the same idf vector is used for all sentences
+    #when multiplying which makes sense since it's a global measure
+
+    #numpy broadcasting takes care of converting idf_vector to a matrix
+    sent_tf_idf_matrix = sent_tf_matrix * idf_vector
+
+    #tf-idf for document, the same idf vector used for sentences is used here
+    doc_tf_idf_vector = doc_tf_vector * idf_vector
+
+    return sent_tf_idf_matrix, doc_tf_idf_vector
 
 
 
@@ -97,5 +114,5 @@ vocab_size = len(vocab)
 word_to_index = {word:i for i, word in enumerate(vocab)}
 index_to_word = {i:word for i, word in enumerate(vocab)}
 
-idf_vector, tf_matrix = calculate_tf_idf(sentence_tokens, vocab, vocab_size, word_to_index)
+sent_tf_idf_matrix, doc_tf_idf_vector = calculate_tf_idf(sentence_tokens, doc_tokens, vocab, vocab_size, word_to_index)
 
