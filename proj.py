@@ -2,11 +2,13 @@ from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import snowball
 import numpy as np
+from numpy.linalg import norm
 from math import log
 import string
 
 doc_language = 'english'
 #doc_language = 'portuguese'
+num_sentences = 5
 
 stop_words = stopwords.words(doc_language)
 
@@ -93,7 +95,22 @@ def calculate_tf_idf(sentence_tokens, doc_tokens, vocab, vocab_size, word_to_ind
 
     return sent_tf_idf_matrix, doc_tf_idf_vector
 
+def rank_sentences(sent_tf_idf_matrix, doc_tf_idf_vector, num_sentences):
 
+    #to simplify calculating cosine similarity we should first
+    #normalize the tf_idf vectors
+    sent_tf_idf_matrix /= norm(sent_tf_idf_matrix, axis=1, keepdims=True)
+    doc_tf_idf_vector /= norm(doc_tf_idf_vector)
+
+    #now calculating the scores becomes simply a matrix multiplication
+    #ranked_sentences is a (num_sentences,) vector where each position
+    #represents the score assigned to that sentence, higher values are better
+    ranked_sentences = sent_tf_idf_matrix.dot(doc_tf_idf_vector)
+
+    #retrieve indexes of highest scoring sentences
+    relevant_sent_indexes = ranked_sentences.argsort()[-num_sentences:][::-1]
+
+    return ranked_sentences, relevant_sent_indexes 
 
 f = open('doc.txt')
 doc = f.read()
@@ -115,4 +132,11 @@ word_to_index = {word:i for i, word in enumerate(vocab)}
 index_to_word = {i:word for i, word in enumerate(vocab)}
 
 sent_tf_idf_matrix, doc_tf_idf_vector = calculate_tf_idf(sentence_tokens, doc_tokens, vocab, vocab_size, word_to_index)
+
+ranked_sentences, relevant_sent_indexes = rank_sentences(sent_tf_idf_matrix, doc_tf_idf_vector, num_sentences)
+
+print('Showing', num_sentences, 'most relevant sentences')
+for sent_index in relevant_sent_indexes:
+    print('Score:', ranked_sentences[sent_index], '-', sentences[sent_index])
+
 
