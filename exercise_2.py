@@ -32,7 +32,7 @@ def main():
     #global variables
     source_text_path = 'temario/textos-fonte'
     summaries_path = 'temario/sumarios'
-    retrieve_files = 2
+    retrieve_files = 25
     num_sentences_retrieved = 5
     doc_language = 'portuguese'
 
@@ -75,16 +75,47 @@ should have the same number of text files'
         #ranked retrieval
         ranked_sentences, relevant_sent_indexes = rank_sentences(sent_tf_idf_matrix, doc_tf_idf_vector, num_sentences_retrieved)
 
-        #tokenize summary file into sentences and convert it to sentence indexes
+        #summaries_text[doc_id]
+
+        globals().update(locals())
+        #sentences_no_quotations = [sentence.replace('\'"'
+        #print(doc_name[doc_id])
+        #print([doc_sentences[doc_id].index(summary_sentence) for summary_sentence in summary_sentences])
+
+
+        #tokenize summary file into sentences
         summary_sentences = sent_tokenize(summaries_text[doc_id])
 
         print([doc_sentences[doc_id].index(summary_sentence) for summary_sentence in summary_sentences])
 
-        print()
-        for sent_index in relevant_sent_indexes:
-            print('Score:', ranked_sentences[sent_index], '-', doc_sentences[doc_id][sent_index])
+        #print (get_relevant_indexes(doc_sentences[doc_id], summaries_text[doc_id]))
 
-    globals().update(locals())
+
+    #globals().update(locals())
+
+def get_relevant_indexes(sentences, summary_text):
+
+    relevant_indexes = []
+
+    #tokenize summary file into sentences
+    summary_sentences = sent_tokenize(summary_text)
+    
+    #for each summary sentence we must find its sentence index on the document
+    for summary_sentence in summary_sentences:
+
+        summary_sentence = summary_sentence.replace('\'', '')
+        summary_sentence = summary_sentence.replace('"', '')
+
+        for i, doc_sentence in enumerate(sentences):
+
+            doc_sentence = doc_sentence.replace('\'', '')
+            doc_sentence = doc_sentence.replace('"', '')
+            if summary_sentence == doc_sentence:
+                relevant_indexes.append(i)
+
+
+
+    return relevant_indexes
 
 if __name__ == '__main__':
     main()
