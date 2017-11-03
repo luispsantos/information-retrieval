@@ -60,7 +60,7 @@ def sent_word_tokenize(doc_text, doc_language='english'):
 
     return doc_sentences, doc_sent_words
 
-def create_vocab(doc_sent_words, use_bigrams):
+def create_vocab(doc_sent_words):
     """
     creates a vocabulary for all documents which consists
     of a list of all unique words, for each word we create
@@ -88,20 +88,9 @@ def create_vocab(doc_sent_words, use_bigrams):
         for sentences in doc:
             for word in sentences:
                 flat_list.append(word)
-
-        if (use_bigrams):
-            bigrams = []
-            for sentences in doc:
-                for i in range(len(sentences)):
-                    if i < len(sentences) - 1:
-                        bigrams.append((sentences[i], sentences[i + 1]))
-            vocab = list(set(flat_list + bigrams))
-        else:
-            # retrieve a list of all unique words
-            vocab = list(set(flat_list))
-
+    
     #retrieve a list of all unique words
-    #vocab = list(set(flat_list))
+    vocab = list(set(flat_list))
     vocab_size = len(vocab)
     
     #create mapping between words and indexes
@@ -220,7 +209,7 @@ def main_ex1():
     sentences = doc_sentences[0]
 
     #retrieve vocabulary and word-index mappings
-    vocab, vocab_size, word_to_index, index_to_word = create_vocab(doc_sent_words, False)
+    vocab, vocab_size, word_to_index, index_to_word = create_vocab(doc_sent_words)
 
     #idf vector
     idf_vector = calculate_idf(doc_sent_words, vocab, vocab_size, word_to_index) 
