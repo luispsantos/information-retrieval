@@ -1,4 +1,5 @@
 from exercise_1 import *
+from exercise_3 import *
 import os
 
 def read_docs(dir_path, retrieve_files=-1, encoding='latin-1'):
@@ -50,7 +51,7 @@ def calculate_metrics(retrieved_sent_indexes, relevant_sent_indexes):
     
     return precision, recall, f1_score, avg_precision
 
-def main():
+def main_ex2(use_bm25=False):
 
     #global variables
     source_text_path = 'temario/textos-fonte'
@@ -82,7 +83,10 @@ should have the same number of text files'
     vocab, vocab_size, word_to_index, index_to_word = create_vocab(doc_sent_words)
 
     #idf vector
-    idf_vector = calculate_idf(doc_sent_words, vocab, vocab_size, word_to_index) 
+    if use_bm25:
+        idf_vector = calculate_idf_bm25(doc_sent_words, vocab, vocab_size, word_to_index)
+    else:
+        idf_vector = calculate_idf(doc_sent_words, vocab, vocab_size, word_to_index) 
 
     #now we iterate over all documents and perform ranked retrieval for each one
     mean_avg_precision = 0
@@ -90,7 +94,11 @@ should have the same number of text files'
 
         #sentence tf matrix and document tf vector
         doc_words = [word for sentence in doc_sent_words[doc_id] for word in sentence]
-        sent_tf_matrix, doc_tf_vector = calculate_tf(doc_sent_words[doc_id], doc_words, vocab, vocab_size, word_to_index)
+        
+        if use_bm25:
+            sent_tf_matrix, doc_tf_vector = calculate_tf_bm25(doc_sent_words[doc_id], doc_words, vocab, vocab_size, word_to_index)
+        else:
+            sent_tf_matrix, doc_tf_vector = calculate_tf(doc_sent_words[doc_id], doc_words, vocab, vocab_size, word_to_index)
 
         #calculate tf-idf
         sent_tf_idf_matrix, doc_tf_idf_vector = calculate_tf_idf(sent_tf_matrix, doc_tf_vector, idf_vector)
@@ -114,5 +122,5 @@ should have the same number of text files'
 
 
 if __name__ == '__main__':
-    main()
+    main_ex2(use_bm25=False)
 

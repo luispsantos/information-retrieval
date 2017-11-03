@@ -188,7 +188,7 @@ def rank_sentences(sent_tf_idf_matrix, doc_tf_idf_vector, num_sentences_retrieve
     return ranked_sentences, relevant_sent_indexes 
 
 
-def main():
+def main_ex1():
 
     #global variables
     doc_name = 'computer-science.txt'
@@ -229,5 +229,5 @@ def main():
         print('Score:', ranked_sentences[sent_index], '-', sentences[sent_index])
 
 if __name__ == '__main__':
-    main()
+    main_ex1()
 
