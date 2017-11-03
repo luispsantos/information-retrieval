@@ -80,7 +80,7 @@ should have the same number of text files'
     doc_sentences, doc_sent_words = sent_word_tokenize(doc_text, doc_language)
 
     #retrieve vocabulary and word-index mappings
-    vocab, vocab_size, word_to_index, index_to_word = create_vocab(doc_sent_words)
+    vocab, vocab_size, word_to_index, index_to_word = create_vocab(doc_sent_words, False)
 
     #idf vector
     if use_bm25:
