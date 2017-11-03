@@ -3,6 +3,7 @@ from numpy.linalg import norm
 from math import log
 import string
 
+import nltk
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
 from nltk.stem.snowball import SnowballStemmer
@@ -135,7 +136,6 @@ def calculate_tf(sentence_words, doc_words, vocab, vocab_size, word_to_index):
 
     for sent_id, sentence in enumerate(sentence_words):
         for word in sentence:
-            #print(word, word_to_index[word])
             sent_tf_matrix[sent_id, word_to_index[word]] += 1
 
     #normalizing tf scores

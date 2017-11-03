@@ -28,7 +28,7 @@ def read_docs(dir_path, retrieve_files=-1, encoding='latin-1'):
             
     return doc_name, doc_text
 
-def calculate_metrics(retrieved_sent_indexes, relevant_sent_indexes):
+def calculate_metrics(retrieved_sent_indexes, relevant_sent_indexes, epsilon=0.01):
     """
     given sorted lists of retrieved and relevant sentences indexes
     calculate common measures used in Information Retrieval
@@ -40,7 +40,8 @@ def calculate_metrics(retrieved_sent_indexes, relevant_sent_indexes):
     recall = intersection_len / len(relevant_sent_indexes)
     precision = intersection_len / len(retrieved_sent_indexes)
     
-    f1_score = 2*((recall * precision)/(recall + precision))
+    #we add epsilon to the denominator to avoid division by 0
+    f1_score = 2*((recall * precision)/(recall + precision + epsilon))
     
     avg_precision = 0
     relevant_seen = 0
@@ -51,7 +52,7 @@ def calculate_metrics(retrieved_sent_indexes, relevant_sent_indexes):
     
     return precision, recall, f1_score, avg_precision
 
-def main_ex2(use_bm25=False):
+def main_ex2(use_bm25=False, n_grams=1, use_pos_tags=False, pos_regex=''):
 
     #global variables
     source_text_path = 'temario/textos-fonte'
@@ -77,8 +78,8 @@ should have the same number of text files'
         assert doc_file_name[3:] == summary_file_name[4:], 'Files ' + doc_file_name + ' and ' + summary_file_name + ' do not match'
 
     #apply sentence and word tokenization
-    doc_sentences, doc_sent_words = sent_word_tokenize(doc_text, doc_language)
-
+    doc_sentences, doc_sent_words = sent_word_tokenize_advanced(doc_text, doc_language, n_grams, use_pos_tags, pos_regex)
+ 
     #retrieve vocabulary and word-index mappings
     vocab, vocab_size, word_to_index, index_to_word = create_vocab(doc_sent_words)
 
