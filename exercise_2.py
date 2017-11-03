@@ -1,4 +1,5 @@
 from exercise_1 import *
+import os
 
 def read_docs(dir_path, retrieve_files=-1, encoding='latin-1'):
     """
@@ -26,6 +27,28 @@ def read_docs(dir_path, retrieve_files=-1, encoding='latin-1'):
             
     return doc_name, doc_text
 
+def calculate_metrics(retrieved_sent_indexes, relevant_sent_indexes):
+    """
+    given sorted lists of retrieved and relevant sentences indexes
+    calculate common measures used in Information Retrieval
+    """
+    
+    #calculate list intersection
+    intersection_len = len(set(retrieved_sent_indexes).intersection(relevant_sent_indexes))
+    
+    recall = intersection_len / len(relevant_sent_indexes)
+    precision = intersection_len / len(retrieved_sent_indexes)
+    
+    f1_score = 2*((recall * precision)/(recall + precision))
+    
+    avg_precision = 0
+    relevant_seen = 0
+    for i, sent_id in enumerate(retrieved_sent_indexes):
+        if sent_id in relevant_sent_indexes:
+            relevant_seen += 1
+            avg_precision += relevant_seen / (i+1)
+    
+    return precision, recall, f1_score, avg_precision
 
 def main():
 
@@ -60,9 +83,9 @@ should have the same number of text files'
 
     #idf vector
     idf_vector = calculate_idf(doc_sent_words, vocab, vocab_size, word_to_index) 
-    globals().update(locals())
 
     #now we iterate over all documents and perform ranked retrieval for each one
+    mean_avg_precision = 0
     for doc_id in range(num_docs):
 
         #sentence tf matrix and document tf vector
@@ -73,49 +96,22 @@ should have the same number of text files'
         sent_tf_idf_matrix, doc_tf_idf_vector = calculate_tf_idf(sent_tf_matrix, doc_tf_vector, idf_vector)
 
         #ranked retrieval
-        ranked_sentences, relevant_sent_indexes = rank_sentences(sent_tf_idf_matrix, doc_tf_idf_vector, num_sentences_retrieved)
-
-        #summaries_text[doc_id]
-
-        globals().update(locals())
-        #sentences_no_quotations = [sentence.replace('\'"'
-        #print(doc_name[doc_id])
-        #print([doc_sentences[doc_id].index(summary_sentence) for summary_sentence in summary_sentences])
-
+        ranked_sentences, retrieved_sent_indexes = rank_sentences(sent_tf_idf_matrix, doc_tf_idf_vector, num_sentences_retrieved)
 
         #tokenize summary file into sentences
         summary_sentences = sent_tokenize(summaries_text[doc_id])
 
-        print([doc_sentences[doc_id].index(summary_sentence) for summary_sentence in summary_sentences])
-
-        #print (get_relevant_indexes(doc_sentences[doc_id], summaries_text[doc_id]))
-
-
-    #globals().update(locals())
-
-def get_relevant_indexes(sentences, summary_text):
-
-    relevant_indexes = []
-
-    #tokenize summary file into sentences
-    summary_sentences = sent_tokenize(summary_text)
+        relevant_sent_indexes = [doc_sentences[doc_id].index(summary_sentence) for summary_sentence in summary_sentences]
+        relevant_sent_indexes.sort()
+        
+        precision, recall, f1_score, avg_precision = calculate_metrics(retrieved_sent_indexes, relevant_sent_indexes)
+        mean_avg_precision += avg_precision
+        
+        print('Doc name:', doc_name[doc_id][3:], 'Pr:', round(precision, 3), 'Re:', round(recall, 3), 'F1 score:', round(f1_score, 3))
     
-    #for each summary sentence we must find its sentence index on the document
-    for summary_sentence in summary_sentences:
-
-        summary_sentence = summary_sentence.replace('\'', '')
-        summary_sentence = summary_sentence.replace('"', '')
-
-        for i, doc_sentence in enumerate(sentences):
-
-            doc_sentence = doc_sentence.replace('\'', '')
-            doc_sentence = doc_sentence.replace('"', '')
-            if summary_sentence == doc_sentence:
-                relevant_indexes.append(i)
+    print('Mean average precision:', mean_avg_precision / num_docs)
 
 
-
-    return relevant_indexes
 
 if __name__ == '__main__':
     main()

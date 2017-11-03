@@ -2,8 +2,6 @@ import numpy as np
 from numpy.linalg import norm
 from math import log
 import string
-import os
-import nltk.data
 
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
