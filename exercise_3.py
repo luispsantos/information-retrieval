@@ -130,6 +130,22 @@ def calculate_idf_bm25(doc_sent_words, vocab, vocab_size, word_to_index):
 
     return idf_vector
 
+def create_vocab_with_bigrams(doc_sent_words):
+    bigrams = []
+    for doc in doc_sent_words:
+        for sentences in doc:
+            for i in range(len(sentences)):
+                if i < len(sentences) - 1:
+                    bigrams.append((sentences[i], sentences[i + 1]))
+
+    vocab, vocab_size, word_to_index, index_to_word = create_vocab(doc_sent_words)
+    vocab+=bigrams
+    vocab_size+=len(bigrams)
+    word_to_index = {word: i for i, word in enumerate(vocab)}
+    index_to_word = {i: word for i, word in enumerate(vocab)}
+
+    return vocab, vocab_size, word_to_index, index_to_word
+
 
 if __name__ == '__main__':
     print('Ex 2 without BM25')
