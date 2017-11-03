@@ -12,18 +12,17 @@ def read_docs(dir_path, retrieve_files=-1, encoding='latin-1'):
     doc_name = []
     doc_text = []
     
-    file_name_list = os.listdir(dir_path)
+    file_name_list = [file_name for file_name in os.listdir(dir_path) if file_name.endswith('.txt')]
     file_name_list.sort()
     if retrieve_files != -1:
         file_name_list = file_name_list[:retrieve_files]
 
     for file_name in file_name_list:
-        if file_name.endswith(".txt"):
-            doc_name.append(file_name)
-            
-            f = open(os.path.join(dir_path, file_name), 'r', encoding=encoding)
-            doc_text.append(f.read())
-            f.close()
+        doc_name.append(file_name)
+        
+        f = open(os.path.join(dir_path, file_name), 'r', encoding=encoding)
+        doc_text.append(f.read())
+        f.close()
             
     return doc_name, doc_text
 
@@ -40,6 +39,7 @@ def main():
     #read source texts and summaries
     doc_name, doc_text = read_docs(source_text_path, retrieve_files)
     summaries_name, summaries_text = read_docs(summaries_path, retrieve_files)
+    num_docs = len(doc_name)
 
     #check to see if each source_text has a corresponding summary
     assert len(doc_name) == len(summaries_name), 'Source texts and summaries directory\
@@ -60,13 +60,14 @@ should have the same number of text files'
 
     #idf vector
     idf_vector = calculate_idf(doc_sent_words, vocab, vocab_size, word_to_index) 
+    globals().update(locals())
 
     #now we iterate over all documents and perform ranked retrieval for each one
-    for sentences, sent_words in zip(doc_sentences, doc_sent_words):
+    for doc_id in range(num_docs):
 
         #sentence tf matrix and document tf vector
-        doc_words = [word for sentence in sent_words for word in sentence]
-        sent_tf_matrix, doc_tf_vector = calculate_tf(sent_words, doc_words, vocab, vocab_size, word_to_index)
+        doc_words = [word for sentence in doc_sent_words[doc_id] for word in sentence]
+        sent_tf_matrix, doc_tf_vector = calculate_tf(doc_sent_words[doc_id], doc_words, vocab, vocab_size, word_to_index)
 
         #calculate tf-idf
         sent_tf_idf_matrix, doc_tf_idf_vector = calculate_tf_idf(sent_tf_matrix, doc_tf_vector, idf_vector)
@@ -74,9 +75,14 @@ should have the same number of text files'
         #ranked retrieval
         ranked_sentences, relevant_sent_indexes = rank_sentences(sent_tf_idf_matrix, doc_tf_idf_vector, num_sentences_retrieved)
 
+        #tokenize summary file into sentences and convert it to sentence indexes
+        summary_sentences = sent_tokenize(summaries_text[doc_id])
+
+        print([doc_sentences[doc_id].index(summary_sentence) for summary_sentence in summary_sentences])
+
         print()
         for sent_index in relevant_sent_indexes:
-            print('Score:', ranked_sentences[sent_index], '-', sentences[sent_index])
+            print('Score:', ranked_sentences[sent_index], '-', doc_sentences[doc_id][sent_index])
 
     globals().update(locals())
 
